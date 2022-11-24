@@ -7,30 +7,6 @@
 
 import SwiftUI
 
-class Player: ObservableObject {
-    let backgroundColor: Color
-    let tintColor: Color
-
-    @Published var time: TimeInterval?
-    @Published var wins: Int = 0
-    @Published var hasTapped: Bool = false
-
-    var isDisabled: Bool {
-        hasTapped && time == nil
-    }
-
-    init(backgroundColor: Color, tintColor: Color, time: TimeInterval? = nil) {
-        self.backgroundColor = backgroundColor
-        self.tintColor = tintColor
-        self.time = time
-    }
-
-    func reset() {
-        time = nil
-        hasTapped = false
-    }
-}
-
 class ReactionGameModel: ObservableObject {
     @Published var isGameRunning: Bool = false {
         didSet {
@@ -116,6 +92,14 @@ class ReactionGameModel: ObservableObject {
         }
     }
 }
+
+#if DEBUG
+extension ReactionGameModel {
+    static var mock: ReactionGameModel {
+        ReactionGameModel()
+    }
+}
+#endif
 
 extension TimeInterval {
     var reactionTimeString: String {
