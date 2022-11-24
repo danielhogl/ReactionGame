@@ -52,8 +52,10 @@ struct PlayerView: View {
         }
         .confettiCannon(
             counter: $player.wins,
+            num: 30,
+            colors: [.blue, .red, .green, .yellow, .purple, .mint, .indigo],
             radius: 500,
-            repetitions: 2,
+            repetitions: 1,
             repetitionInterval: 0.75
         )
         .onTapGesture {
@@ -65,7 +67,7 @@ struct PlayerView: View {
 
 struct ButtonView: View {
     @ObservedObject var gameModel: ReactionGameModel
-
+    
     var body: some View {
 
         Group {
@@ -82,16 +84,16 @@ struct ButtonView: View {
                 ZStack {
                     Circle()
                         .fill(Color("accent"))
-                        .opacity(gameModel.isWaiting ? 0.5 : 0)
+                        .opacity(0.5)
                         .scaleEffect(gameModel.isWaiting ? 2 : 1)
                         .animation(
-                            gameModel.isWaiting ?
-                                .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : nil,
+                            gameModel.isWaiting ? .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : .default,
                             value: gameModel.isWaiting
                         )
 
                     Button {
                         gameModel.restart()
+
                     } label: {
                         Group {
                             if gameModel.isGameRunning {

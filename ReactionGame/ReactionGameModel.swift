@@ -32,11 +32,18 @@ class Player: ObservableObject {
 }
 
 class ReactionGameModel: ObservableObject {
-    @Published var isGameRunning: Bool = false
+    @Published var isGameRunning: Bool = false {
+        didSet {
+            timer?.invalidate()
+        }
+    }
+
     @Published var firedDate: Date?
 
     @Published var player1 = Player(backgroundColor: Color("player1"), tintColor: Color("player2"))
     @Published var player2 = Player(backgroundColor: Color("player2"), tintColor: Color("player1"))
+
+    private var timer: Timer?
 
     var isTimerFired: Bool {
         firedDate != nil
@@ -60,7 +67,7 @@ class ReactionGameModel: ObservableObject {
         firedDate = nil
         isGameRunning = true
 
-        Timer.scheduledTimer(withTimeInterval: randomInterval, repeats: false) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: randomInterval, repeats: false) { timer in
             withAnimation {
                 self.firedDate = Date()
             }
