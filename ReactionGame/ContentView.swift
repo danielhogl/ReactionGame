@@ -14,31 +14,34 @@ struct ContentView: View {
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
-                PlayerView(player: gameModel.player1)
-                    .onTapGesture {
-                        gameModel.tapped(player: gameModel.player1)
-                    }
-                
-                PlayerView(player: gameModel.player2)
-                    .onTapGesture {
-                        gameModel.tapped(player: gameModel.player2)
-                    }
+                PlayerView(gameModel: gameModel, player: gameModel.player1)
+                PlayerView(gameModel: gameModel, player: gameModel.player2)
             }
 
             ButtonView(gameModel: gameModel)
                 .frame(height: 100)
-
         }
         .ignoresSafeArea()
     }
 }
 
 struct PlayerView: View {
+    @ObservedObject var gameModel: ReactionGameModel
     @ObservedObject var player: Player
 
     var body: some View {
         ZStack {
+            Color.black
+
             player.backgroundColor
+                .opacity(player.isDisabled ? 0.75 : 1)
+
+            if player.isDisabled {
+                Image(systemName: "lock.circle")
+                    .font(.system(size: 48))
+                    .foregroundColor(Color("accent"))
+                    .transition(.scale)
+            }
 
             if let time = player.time {
                 Text("\(time.reactionTimeString)")
@@ -53,14 +56,15 @@ struct PlayerView: View {
             repetitions: 2,
             repetitionInterval: 0.75
         )
-
+        .onTapGesture {
+            gameModel.tapped(player: player)
+        }
+        .disabled(player.isDisabled)
     }
 }
 
 struct ButtonView: View {
     @ObservedObject var gameModel: ReactionGameModel
-
-    @State private var isAnimating = false
 
     var body: some View {
 
@@ -78,16 +82,16 @@ struct ButtonView: View {
                 ZStack {
                     Circle()
                         .fill(Color("accent"))
-                        .opacity(isAnimating ? 0.5 : 0)
-                        .scaleEffect(isAnimating ? 2 : 1)
+                        .opacity(gameModel.isWaiting ? 0.5 : 0)
+                        .scaleEffect(gameModel.isWaiting ? 2 : 1)
                         .animation(
-                            .easeInOut(duration: 0.8).repeatForever(autoreverses: true),
-                            value: isAnimating
+                            gameModel.isWaiting ?
+                                .easeInOut(duration: 0.8).repeatForever(autoreverses: true) : nil,
+                            value: gameModel.isWaiting
                         )
 
                     Button {
                         gameModel.restart()
-                        isAnimating = true
                     } label: {
                         Group {
                             if gameModel.isGameRunning {
@@ -102,16 +106,11 @@ struct ButtonView: View {
                         .foregroundColor(Color("player1"))
                         .clipShape(Circle())
                     }
-                    .disabled(isAnimating)
+                    .disabled(gameModel.isWaiting)
                     .transition(.scale)
                 }
             }
         }
-        .onChange(of: gameModel.isTimerFired, perform: { newValue in
-            if newValue {
-                isAnimating = false
-            }
-        })
     }
 }
 

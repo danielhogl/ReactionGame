@@ -10,13 +10,24 @@ import SwiftUI
 class Player: ObservableObject {
     let backgroundColor: Color
     let tintColor: Color
+
     @Published var time: TimeInterval?
     @Published var wins: Int = 0
+    @Published var hasTapped: Bool = false
+
+    var isDisabled: Bool {
+        hasTapped && time == nil
+    }
 
     init(backgroundColor: Color, tintColor: Color, time: TimeInterval? = nil) {
         self.backgroundColor = backgroundColor
         self.tintColor = tintColor
         self.time = time
+    }
+
+    func reset() {
+        time = nil
+        hasTapped = false
     }
 }
 
@@ -31,6 +42,10 @@ class ReactionGameModel: ObservableObject {
         firedDate != nil
     }
 
+    var isWaiting: Bool {
+        isGameRunning && !isTimerFired
+    }
+
     var randomInterval: TimeInterval {
         TimeInterval.random(in: 3...10)
     }
@@ -40,8 +55,8 @@ class ReactionGameModel: ObservableObject {
     }
 
     func restart() {
-        player1.time = nil
-        player2.time = nil
+        player1.reset()
+        player2.reset()
         firedDate = nil
         isGameRunning = true
 
@@ -53,22 +68,38 @@ class ReactionGameModel: ObservableObject {
     }
 
     func tapped(player: Player) {
+        guard isGameRunning else { return }
+
+        defer {
+            evaluateWinner()
+        }
+
+        withAnimation {
+            player.hasTapped = true
+        }
+
         guard isTimerFired, player.time == nil else { return }
 
         withAnimation {
             player.time = elapsedTime
-            evaluateWinner()
         }
     }
 
     func evaluateWinner() {
-        guard let player1Time = player1.time, let player2Time = player2.time else {
+        guard player1.hasTapped, player2.hasTapped else {
             return
         }
 
-        isGameRunning = false
+        withAnimation {
+            isGameRunning = false
+        }
 
-        if player1Time < player2Time {
+        let player1Time = player1.time ?? .infinity
+        let player2Time = player2.time ?? .infinity
+
+        if player1Time == .infinity, player2Time == .infinity {
+            return
+        } else if player1Time < player2Time {
             player1.wins += 1
         } else if player2Time < player1Time {
             player2.wins += 1
