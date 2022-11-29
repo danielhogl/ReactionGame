@@ -13,7 +13,7 @@ class Player: ObservableObject {
 
     @Published var time: TimeInterval?
     @Published var wins: Int = 0
-    @Published var hasTapped: Bool = false
+    @Published var hasTapped: Bool = true
 
     var isDisabled: Bool {
         hasTapped && time == nil

@@ -20,10 +20,15 @@ struct PlayerView: View {
                 .opacity(player.isDisabled ? 0.75 : 1)
 
             if player.isDisabled {
-                Image(systemName: "lock.circle")
-                    .font(.system(size: 48))
-                    .foregroundColor(Color("accent"))
-                    .transition(.scale)
+                VStack(spacing: 22) {
+                    Text("You only have 1 chance!")
+                        .font(.system(size: 18, design: .rounded))
+
+                    Image(systemName: "lock.circle")
+                        .font(.system(size: 48))
+                }
+                .foregroundColor(Color("accent"))
+                .transition(.scale)
             }
 
             if let time = player.time {
@@ -37,9 +42,10 @@ struct PlayerView: View {
             counter: $player.wins,
             num: 30,
             colors: [.blue, .red, .green, .yellow, .purple, .mint, .indigo],
+            confettiSize: 10,
             radius: 500,
             repetitions: 1,
-            repetitionInterval: 0.75
+            repetitionInterval: 0.8
         )
         .onTapGesture {
             gameModel.tapped(player: player)
