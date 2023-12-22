@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ButtonView: View {
     @ObservedObject var gameModel: ReactionGameModel
+    
     var body: some View {
 
         Group {
